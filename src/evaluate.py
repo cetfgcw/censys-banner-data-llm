@@ -267,11 +267,14 @@ def save_evaluation_results(results: Dict[str, any], output_path: str):
     logger.info(f"Evaluation results saved to {output_path}")
 
 
-def print_evaluation_summary(results: Dict[str, any]):
+def print_evaluation_summary(results: Dict[str, Any], file=None):
     """Print a human-readable evaluation summary."""
-    print("\n" + "="*80)
-    print("EVALUATION SUMMARY")
-    print("="*80)
+    if file is None:
+        file = sys.stdout
+    
+    print("\n" + "="*80, file=file)
+    print("EVALUATION SUMMARY", file=file)
+    print("="*80, file=file)
     
     print(f"\nModel: {results['model_config']['model_name']}", file=file)
     print(f"Quantization: {results['model_config']['use_quantization']} ({results['model_config']['quantization_bits']}-bit)", file=file)
