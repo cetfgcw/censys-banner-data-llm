@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  banner-classifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: banner-classifier-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Model configuration can be overridden via environment variables
+      - MODEL_NAME=TinyLlama/TinyLlama-1.1B-Chat-v1.0
+      - USE_QUANTIZATION=true
+      - QUANTIZATION_BITS=4
+      - USE_FEW_SHOT=true
+    volumes:
+      # Mount data directory if needed
+      - ./banner_data_train.csv:/app/data/banner_data_train.csv:ro
+      # Cache for HuggingFace models (persists between runs)
+      - huggingface_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        limits:
+          # Adjust based on your hardware
+          # For GPU support, uncomment and configure:
+          # reservations:
+          #   devices:
+          #     - driver: nvidia
+          #       count: 1
+          #       capabilities: [gpu]
+          memory: 8G
+          cpus: '4.0'
+        reservations:
+          memory: 4G
+          cpus: '2.0'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s  # Allow time for model loading
+    restart: unless-stopped
+
+volumes:
+  huggingface_cache:
+    driver: local
+
