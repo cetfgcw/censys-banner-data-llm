@@ -29,7 +29,15 @@ def load_dataset(file_path: str) -> pd.DataFrame:
         DataFrame with columns: banner_text, category, source_ip, port
     """
     try:
-        df = pd.read_csv(file_path, encoding='utf-8', on_bad_lines='skip')
+        # pandas >= 1.3.0 uses on_bad_lines, older versions use error_bad_lines
+        try:
+            df = pd.read_csv(file_path, encoding='utf-8', on_bad_lines='skip')
+        except TypeError:
+            # Fallback for pandas < 1.3.0 (deprecated but kept for compatibility)
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                df = pd.read_csv(file_path, encoding='utf-8', error_bad_lines=False, warn_bad_lines=False)
         logger.info(f"Loaded {len(df)} samples from {file_path}")
         return df
     except Exception as e:

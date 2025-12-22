@@ -8,7 +8,6 @@ and error analysis.
 import pandas as pd
 import numpy as np
 from sklearn.metrics import (
-    classification_report,
     confusion_matrix,
     accuracy_score,
     precision_recall_fscore_support
