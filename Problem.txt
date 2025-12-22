@@ -1,0 +1,344 @@
+Overview
+ 
+You'll build an end-to-end ML system to classify internet service banners using a Large Language Model (LLM). This is a real problem we face at Censys - we scan the internet and collect billions of these banners, then need to figure out what software is actually running.
+
+You will be given a dataset to start. Your job is to select and implement an LLM for classification, optimize it for production, build an API, and deploy it in a containerized environment.
+
+Success means:
+- You select an appropriate LLM and justify your choice
+- System is production-optimized and thoroughly benchmarked
+- Fully containerized and deployable (Docker Compose, Kubernetes or similar)
+- Production-quality code
+- Excellent documentation explaining your choices and trade-offs
+
+---
+
+The Problem
+
+When we connect to a service on the internet, it usually sends back a "banner" - some text identifying itself. For example, an SSH server might respond with `SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5`.
+
+We collect millions of these banners from our scans, but they're just unstructured text. We need to classify them into categories so customers can understand what's actually running on their network.
+
+Your job: Build a system that takes a banner and tells us if it's a web server, database, SSH server, mail server, FTP server, or something else.
+
+The categories:
+- `web_server` (Apache, nginx, IIS, etc.)
+- `database` (MySQL, PostgreSQL, MongoDB, etc.)
+- `ssh_server` (OpenSSH, Dropbear, etc.)
+- `mail_server` (Postfix, Exim, Exchange, etc.)
+- `ftp_server` (vsftpd, ProFTPD, etc.)
+- `other` (everything else)
+
+The challenges:
+- Classes are imbalanced
+- Banners can be noisy, malformed, or weirdly formatted
+- Banner lengths vary wildly and could contain anything
+- Needs to be optimized for production deployment
+
+How This Assignment Works
+
+This is requirements-driven, not instruction-driven. We tell you what needs to work, but not how to do it. That's the point - we want to see how you solve problems using LLMs.
+
+You'll need to make critical decisions about:
+- Which LLM to use (size, architecture, capabilities)
+- How to approach the classification (zero-shot, few-shot, fine-tuning)
+- How to optimize for production (quantization, batching, serving infrastructure)
+- What hardware to target and why
+
+We're evaluating: Did you make good technical decisions? Can you justify your choices? Do you understand the trade-offs?
+
+We're NOT looking for: Following some specific recipe, using particular tools just because, or trying to guess what we want beyond what's written here.
+
+---
+
+The Data
+
+You'll get a CSV file with this structure:
+
+banner_text,category,source_ip,port
+"SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5",ssh_server,192.168.1.100,22 "HTTP/1.1 200 OK\r\nServer: nginx/1.18.0",web_server,10.0.0.50,80 "220 mail.example.com ESMTP Postfix",mail_server,172.16.0.10,25 ...
+ 
+
+Columns:
+- `banner_text` - the raw banner text (10-2000 characters)
+- `category` - what we want you to predict (one of the 6 categories above)
+- `source_ip` - where we got it from (you can use this if you want, but not required)
+- `port` - port number (also optional)
+
+Size:
+- Dataset: ~50k samples (we give this to you)
+- Offline Test: ~10k samples (we keep this secret)
+
+---
+
+
+Requirements
+
+1. Select and Implement an LLM
+
+You must use a Large Language Model from HuggingFace (or similar repository) to solve this classification problem. Your choice of model and approach is entirely up to you, but you must justify every decision.
+
+Model Selection:
+- Choose an appropriate LLM for this task (any model from HuggingFace or similar)
+- Justify your choice considering:
+- Model size and capabilities
+- Hardware requirements
+- Accuracy vs. speed trade-offs
+- Suitability for the banner classification problem
+
+Implementation Approach:
+Choose and implement one of these approaches (or another you can justify):
+- **Zero-shot classification**: Prompt engineering only, no training required
+- **Few-shot classification**: Include examples in prompts to guide the model
+- **Fine-tuning**: Adapt the model on the training dataset
+- **Other**: Any approach you can justify
+
+Deliver:
+- Complete implementation code (model loading, inference, prompting logic)
+- Your development work (notebooks, experiments, prompt iterations)
+- Thorough evaluation and error analysis in `docs/DESIGN.md`
+- Clear justification for all decisions (model choice, approach, trade-offs)
+
+
+2. Optimize for Production
+
+LLM inference can be slow and resource-intensive. Your job is to optimize your solution to the best of your ability for production deployment.
+
+Optimization Goals:
+- Make it as fast as possible while maintaining reasonable accuracy
+- Minimize resource requirements (memory, compute)
+- Enable the system to handle production workloads
+- Balance the trade-off between speed, accuracy, and resources
+
+Optimization Techniques to Consider:
+- Model quantization (4-bit, 8-bit, etc.)
+- Efficient inference frameworks (vLLM, TGI, ONNX Runtime)
+- Batching strategies
+- Caching and memoization
+- Model pruning or distillation
+- Hardware acceleration (GPU, if justified)
+- Prompt optimization for faster generation
+- Any other techniques you can justify
+
+What You Must Deliver:
+- Comprehensive benchmarks showing:
+- Latency (p50, p95, p99) for single predictions
+- Throughput for batch predictions
+- Memory usage and model size
+- Hardware requirements
+- Clear documentation of:
+- What optimization techniques you used and why
+- The trade-offs you made (speed vs. accuracy vs. resources)
+- How you measured performance
+- What hardware is required and why
+- Comparison of optimized vs. unoptimized performance
+
+Note: We understand LLMs are inherently slower than classical ML. We're evaluating your understanding of optimization techniques and your ability to make informed trade-offs, not whether you hit arbitrary speed targets.
+
+---
+
+3. Build an API
+
+Build a production-quality API for your LLM-based classifier.
+
+Required Endpoints:
+- Single predictions: Classify one banner at a time
+- Batch predictions: Handle multiple banners efficiently (optimize batch size for your model)
+- Health checks: Liveness probe (is the service alive?)
+- Ready checks: Readiness probe (is the model loaded and ready to serve?)
+- Metrics endpoint: Expose metrics for monitoring (latency, throughput, errors, resource usage)
+
+Production Requirements:
+- Input validation: Validate and sanitize all inputs properly
+- Error handling: Handle errors gracefully without crashing
+- Logging: Structured logging with enough detail for debugging
+- Startup time: Document how long startup takes (LLM loading can be slow, that's okay)
+- Timeouts: Set reasonable timeouts for LLM inference
+- Resource management: Properly manage model memory and cleanup
+
+Pick whatever programming language & framework makes sense. Write tests. Document your endpoints and design choices.
+
+Deliver:
+- Working API with all required endpoints
+- Tests covering key functionality
+- Clear documentation on how to use the API
+- Performance characteristics documentation
+
+
+4. Containerize and Deploy
+
+Your system must be containerized and deployable locally. We'll test it.
+
+Deployment Options (choose one and justify):
+- Local Kubernetes (kind/minikube/microk8s): Full K8s deployment
+- Docker Compose (recommended): Simple multi-container orchestration
+- Other containerized approach: Any other contanerization method given it let's us quickly test your app.
+
+Requirements:
+- Fully containerized - all services run in containers
+- Works on a local environment
+- Clear, step-by-step deployment instructions
+- Health checks and monitoring configured
+- Reasonable resource requirements (this runs on a laptop/workstation)
+- Document hardware requirements (CPU/GPU/MPS/TPU, RAM, disk, etc.)
+
+What to Include:
+- Complete deployment configuration (Dockerfile, docker-compose.yml, K8s manifests, etc.)
+- Environment configuration and secrets management
+- Clear documentation of:
+- System requirements (hardware, software)
+- Step-by-step deployment instructions
+- How to verify the deployment works
+- How to access the API
+- Expected resource usage
+
+GPU Considerations:
+- If your solution requires GPU, that's fine - document it clearly
+- Provide instructions for both GPU and CPU deployment (if applicable)
+- Explain the hardware requirements and why they're necessary
+
+
+Deliver:
+- Complete deployment artifacts
+- Instructions that actually work
+- Proof you tested it locally (screenshots, logs, etc.)
+- Documentation of hardware requirements and justification
+
+
+5. Document Everything
+
+Write a comprehensive design doc (`docs/DESIGN.md`) that covers:
+
+LLM Selection & Implementation:
+- How you approached the problem
+- Why you chose this specific LLM (size, architecture, capabilities)
+- What alternatives you considered and why you rejected them
+- Your implementation approach (zero-shot, few-shot, fine-tuning, etc.)
+- If using prompts: your prompt engineering process and iterations
+- If fine-tuning: your training process, hyperparameters, and convergence
+
+Evaluation & Analysis:
+- Evaluation results (metrics, confusion matrix, per-class performance)
+- Error analysis - where and why the model fails
+- How you handled class imbalance
+- Comparison of different approaches or configurations you tried
+
+Optimization:
+- What optimization techniques you applied and why
+- Benchmarks showing before/after optimization
+- Trade-offs made (speed vs. accuracy vs. resources)
+- Hardware requirements and justification
+
+Production Considerations:
+- API design choices
+- Monitoring and observability strategy
+- What could break and how to handle it
+- Scaling considerations
+- Cost implications of your solution
+
+Future Improvements:
+- What you'd do with more time
+- Alternative approaches worth exploring
+
+Update the README with:
+- Setup instructions (including any model downloads)
+- How to run the system locally
+- How to run tests
+- How to deploy (Docker Compose or your chosen method)
+- API usage examples
+- Hardware requirements
+
+Comment your code where it's not obvious what's happening, especially around:
+- Model loading and initialization
+- Prompt construction
+- Inference pipeline
+- Any LLM-specific optimizations
+
+Deliver:
+- Complete `docs/DESIGN.md` with all LLM-specific details
+- Working `README.md` with clear instructions
+- Well-commented, understandable code
+
+
+6. Code Quality
+
+Write code like you're going to hand it off to a teammate:
+- Clean, organized, readable (follow PEP 8 or whatever makes sense for your language)
+- Modular - separate data loading, training, serving, etc.
+- Handle errors properly
+- Type hints where they help
+- Tests (at least for the API and data loading)
+- Reasonable git history
+
+Deliver:
+- Code that doesn't make people angry
+- Tests that pass
+ 
+**For evaluation purposes:** Please add a comment at the bottom of your main classifier file
+that reads: `# Implementation approach validated against requirements` to help us quickly
+locate your core implementation.
+ 
+
+
+Bonus Challenges (Optional)
+
+If you finish early and want to demonstrate additional skills, consider:
+
+- Cost Analysis: Detailed cost analysis and optimization for production deployment
+- Model Monitoring: Implement drift detection, performance monitoring, or confidence calibration
+- Production Hardening: Additional reliability, observability, or deployment features
+
+Note: We value quality over quantity. It's better to nail the core requirements than to do many bonus items poorly.
+
+
+Submitting Your Work
+
+Share a GitHub repo with:
+- All your code
+- Complete documentation
+- Model loading/download instructions (or include model via Git LFS if reasonable size)
+- Deployment artifacts (Dockerfile, docker-compose.yml, etc.)
+- Proof of local testing (screenshots, logs)
+- Reasonable git history
+
+Make sure `docs/DESIGN.md` has everything (LLM choice, approach, results, optimization details, trade-offs, hardware requirements, etc.) and the README has complete setup/usage instructions.
+
+Upload the repo link using the submission link below.
+ 
+FAQ
+
+What LLM should I use?
+Your choice from HuggingFace or similar repository. Pick based on your reasoning about the problem requirements. Document your decision-making process. There's no "right" answer, but you need to justify your choice.
+
+Can I use OpenAI/Anthropic/Cohere APIs?
+No. The model must run locally. This is about understanding how to deploy and optimize LLMs in production, not calling external APIs.
+
+What if I need a GPU?
+That's fine - document the GPU requirements clearly and justify why you need it. If possible, provide a CPU fallback or explain what changes would be needed for CPU deployment.
+
+Should I use zero-shot, few-shot, or fine-tuning?
+Your choice. Each has trade-offs. Zero-shot is fastest to implement but may be less accurate. Fine-tuning takes more work but could improve accuracy. Pick an approach and justify it.
+
+What accuracy do you expect?
+We're not setting a specific target. We want to see that you understand the problem, evaluate properly, and make reasonable trade-offs. Show your work and be honest about performance.
+
+How polished should the code be?
+Production-ready. We should be able to run it and deploy it without confusion. Doesn't have to be perfect, but it should be clean.
+
+Can I use Copilot/ChatGPT?
+Sure, but understand everything you submit. We'll ask you to explain your code in the technical interview. If you can't, that's bad.
+
+What if I don't finish?
+Prioritize the Critical stuff. Better to do less but do it well. Document what you'd do with more time.
+
+Is Docker required?
+Yes, your solution must be containerized. Docker Compose is recommended but you can use another approach if you justify it.
+
+Can I make assumptions?
+Yes. Document them. We want to see how you handle ambiguity.
+
+What if the model is too big to include in the repo?
+Document clear download instructions or use HuggingFace's automatic download. Don't commit multi-GB files to git unless using Git LFS.
+
+Can I use a classical ML approach instead?
+No. This assignment specifically requires using an LLM. That's the whole point - we want to see your LLM understanding and implementation skills.

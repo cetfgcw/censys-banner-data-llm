@@ -5,6 +5,7 @@ Provides comprehensive evaluation metrics, performance benchmarks,
 and error analysis.
 """
 
+import sys
 import pandas as pd
 import numpy as np
 from sklearn.metrics import (
@@ -12,7 +13,7 @@ from sklearn.metrics import (
     accuracy_score,
     precision_recall_fscore_support
 )
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 import time
 import logging
 from pathlib import Path
@@ -198,7 +199,7 @@ def run_full_evaluation(
     test_csv: Optional[str] = None,
     test_split: float = 0.2,
     sample_size: Optional[int] = None
-) -> Dict[str, any]:
+) -> Dict[str, Any]:
     """
     Run a full evaluation pipeline.
     
@@ -272,48 +273,48 @@ def print_evaluation_summary(results: Dict[str, any]):
     print("EVALUATION SUMMARY")
     print("="*80)
     
-    print(f"\nModel: {results['model_config']['model_name']}")
-    print(f"Quantization: {results['model_config']['use_quantization']} ({results['model_config']['quantization_bits']}-bit)")
-    print(f"Few-shot: {results['model_config']['use_few_shot']}")
+    print(f"\nModel: {results['model_config']['model_name']}", file=file)
+    print(f"Quantization: {results['model_config']['use_quantization']} ({results['model_config']['quantization_bits']}-bit)", file=file)
+    print(f"Few-shot: {results['model_config']['use_few_shot']}", file=file)
     
-    print(f"\nDataset: {results['dataset_info']['evaluated_samples']} samples")
-    print("\nClass Distribution:")
+    print(f"\nDataset: {results['dataset_info']['evaluated_samples']} samples", file=file)
+    print("\nClass Distribution:", file=file)
     for cls, count in results['dataset_info']['class_distribution'].items():
-        print(f"  {cls}: {count}")
+        print(f"  {cls}: {count}", file=file)
     
-    print("\nAccuracy Metrics:")
+    print("\nAccuracy Metrics:", file=file)
     acc_metrics = results['accuracy_metrics']
-    print(f"  Overall Accuracy: {acc_metrics['accuracy']:.4f}")
-    print(f"  Macro F1: {acc_metrics['macro_f1']:.4f}")
-    print(f"  Macro Precision: {acc_metrics['macro_precision']:.4f}")
-    print(f"  Macro Recall: {acc_metrics['macro_recall']:.4f}")
+    print(f"  Overall Accuracy: {acc_metrics['accuracy']:.4f}", file=file)
+    print(f"  Macro F1: {acc_metrics['macro_f1']:.4f}", file=file)
+    print(f"  Macro Precision: {acc_metrics['macro_precision']:.4f}", file=file)
+    print(f"  Macro Recall: {acc_metrics['macro_recall']:.4f}", file=file)
     
-    print("\nPer-Class Performance:")
+    print("\nPer-Class Performance:", file=file)
     for cls, metrics in acc_metrics['per_class'].items():
-        print(f"  {cls}:")
-        print(f"    Precision: {metrics['precision']:.4f}")
-        print(f"    Recall: {metrics['recall']:.4f}")
-        print(f"    F1: {metrics['f1']:.4f}")
-        print(f"    Support: {metrics['support']}")
+        print(f"  {cls}:", file=file)
+        print(f"    Precision: {metrics['precision']:.4f}", file=file)
+        print(f"    Recall: {metrics['recall']:.4f}", file=file)
+        print(f"    F1: {metrics['f1']:.4f}", file=file)
+        print(f"    Support: {metrics['support']}", file=file)
     
-    print("\nLatency Statistics (seconds):")
+    print("\nLatency Statistics (seconds):", file=file)
     latency = results['latency_stats']
-    print(f"  Mean: {latency['mean']:.4f}")
-    print(f"  Median (p50): {latency['median']:.4f}")
-    print(f"  p95: {latency['p95']:.4f}")
-    print(f"  p99: {latency['p99']:.4f}")
-    print(f"  Min: {latency['min']:.4f}")
-    print(f"  Max: {latency['max']:.4f}")
+    print(f"  Mean: {latency['mean']:.4f}", file=file)
+    print(f"  Median (p50): {latency['median']:.4f}", file=file)
+    print(f"  p95: {latency['p95']:.4f}", file=file)
+    print(f"  p99: {latency['p99']:.4f}", file=file)
+    print(f"  Min: {latency['min']:.4f}", file=file)
+    print(f"  Max: {latency['max']:.4f}", file=file)
     
-    print("\nThroughput Benchmarks:")
+    print("\nThroughput Benchmarks:", file=file)
     for batch_size, metrics in results['throughput_benchmarks'].items():
-        print(f"  Batch size {batch_size}: {metrics['throughput']:.2f} predictions/sec")
+        print(f"  Batch size {batch_size}: {metrics['throughput']:.2f} predictions/sec", file=file)
     
     if results['errors']:
-        print(f"\nErrors encountered: {len(results['errors'])}")
-        print("Sample errors:")
+        print(f"\nErrors encountered: {len(results['errors'])}", file=file)
+        print("Sample errors:", file=file)
         for error in results['errors'][:5]:
-            print(f"  {error}")
+            print(f"  {error}", file=file)
     
-    print("\n" + "="*80)
+    print("\n" + "="*80, file=file)
 
