@@ -62,7 +62,7 @@ class BenchmarkResults:
             "std": float(np.std(latencies))
         }
     
-    def get_accuracy_metrics(self) -> Dict[str, any]:
+    def get_accuracy_metrics(self) -> Dict[str, Any]:
         """Calculate accuracy metrics."""
         if not self.predictions or not self.true_labels:
             return {}
