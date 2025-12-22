@@ -18,10 +18,9 @@ from transformers import (
     BitsAndBytesConfig,
     pipeline
 )
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 import logging
 import time
-from enum import Enum
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +225,7 @@ Category:"""
             logger.error(f"Error loading model: {e}")
             raise
     
-    def predict(self, banner_text: str) -> Dict[str, any]:
+    def predict(self, banner_text: str) -> Dict[str, Any]:
         """
         Classify a single banner.
         
@@ -303,7 +302,7 @@ Category:"""
         else:
             return "other"
     
-    def predict_batch(self, banner_texts: List[str]) -> List[Dict[str, any]]:
+    def predict_batch(self, banner_texts: List[str]) -> List[Dict[str, Any]]:
         """
         Classify multiple banners (sequential for now, can be optimized).
         
@@ -315,7 +314,7 @@ Category:"""
         """
         return [self.predict(banner) for banner in banner_texts]
     
-    def get_model_info(self) -> Dict[str, any]:
+    def get_model_info(self) -> Dict[str, Any]:
         """Get information about the loaded model."""
         if self.model is None:
             return {"status": "not_loaded"}
