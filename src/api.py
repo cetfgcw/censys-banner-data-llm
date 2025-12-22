@@ -7,7 +7,7 @@ health checks, readiness probes, and metrics.
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 import time
 import logging
@@ -105,7 +105,8 @@ class BannerPredictionRequest(BaseModel):
     """Request model for single prediction."""
     banner_text: str = Field(..., min_length=1, max_length=2000, description="Banner text to classify")
     
-    @validator('banner_text')
+    @field_validator('banner_text')
+    @classmethod
     def validate_banner_text(cls, v):
         """Sanitize and validate banner text."""
         # Remove null bytes and other problematic characters
@@ -126,7 +127,8 @@ class BatchPredictionRequest(BaseModel):
     """Request model for batch predictions."""
     banners: List[str] = Field(..., min_items=1, max_items=100, description="List of banner texts")
     
-    @validator('banners')
+    @field_validator('banners')
+    @classmethod
     def validate_banners(cls, v):
         """Validate and sanitize banner texts."""
         sanitized = []
