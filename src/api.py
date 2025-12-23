@@ -64,14 +64,23 @@ async def lifespan(app: FastAPI):
     try:
         # Load model configuration from environment or use defaults
         import os
-        config = ModelConfig(
-            use_quantization=os.getenv("USE_QUANTIZATION", "true").lower() == "true",
-            quantization_bits=int(os.getenv("QUANTIZATION_BITS", "4")),
-            use_few_shot=os.getenv("USE_FEW_SHOT", "true").lower() == "true"
-        )
+        model_type = os.getenv("MODEL_TYPE", "roberta").lower()
         
-        classifier = BannerClassifier(config)
-        classifier.load_model()
+        if model_type == "roberta":
+            # Use RoBERTa approach (following Censys research paper)
+            from src.model_roberta import RobertaBannerClassifier
+            model_name = os.getenv("MODEL_NAME", "distilroberta-base")
+            classifier = RobertaBannerClassifier(model_name=model_name)
+            classifier.load_model()
+        else:
+            # Fallback to TinyLlama (few-shot)
+            config = ModelConfig(
+                use_quantization=os.getenv("USE_QUANTIZATION", "true").lower() == "true",
+                quantization_bits=int(os.getenv("QUANTIZATION_BITS", "4")),
+                use_few_shot=os.getenv("USE_FEW_SHOT", "true").lower() == "true"
+            )
+            classifier = BannerClassifier(config)
+            classifier.load_model()
         
         startup_time = time.time() - start
         model_loaded_gauge.set(1)

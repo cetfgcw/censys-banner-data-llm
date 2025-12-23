@@ -10,11 +10,14 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      # Model configuration can be overridden via environment variables
-      - MODEL_NAME=TinyLlama/TinyLlama-1.1B-Chat-v1.0
-      - USE_QUANTIZATION=true
-      - QUANTIZATION_BITS=4
-      - USE_FEW_SHOT=true
+      # Model configuration - default to RoBERTa (research paper approach)
+      - MODEL_TYPE=roberta
+      - MODEL_NAME=distilroberta-base
+      # Alternative: Use TinyLlama by setting MODEL_TYPE=tinylama
+      # - MODEL_TYPE=tinylama
+      # - USE_QUANTIZATION=true
+      # - QUANTIZATION_BITS=4
+      # - USE_FEW_SHOT=true
     volumes:
       # Mount data directory if needed
       - ./banner_data_train.csv:/app/data/banner_data_train.csv:ro

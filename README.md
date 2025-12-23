@@ -4,19 +4,27 @@ An LLM-based classification system for internet service banners. This system cla
 
 ## Overview
 
-This project implements a production-ready machine learning system that:
-- Uses a Large Language Model (TinyLlama-1.1B-Chat) for classification
-- Implements few-shot prompting for accurate predictions
-- Optimizes for production with 4-bit quantization
-- Provides a RESTful API with monitoring and health checks
-- Deploys via Docker Compose
+This project implements a production-ready machine learning system for classifying internet service banners, following the approach from "An LLM-based Framework for Fingerprinting Internet-connected Devices" (IMC '23).
+
+**Two Implementation Approaches:**
+
+1. **RoBERTa-based Classifier** (Primary - Following Research Paper)
+   - Uses RoBERTa transformer architecture (as in Censys research)
+   - Byte-level BPE tokenization (handles banner text well)
+   - Supports fine-tuning for improved accuracy
+   - Faster inference, better for production
+
+2. **TinyLlama Few-Shot** (Alternative)
+   - Small LLM with few-shot prompting
+   - No training required
+   - Good for quick prototyping
 
 **Key Features:**
-- 85% accuracy on test data
-- ~1.2s latency per prediction (CPU), ~0.3s (GPU)
-- Production-ready API with metrics and monitoring
-- Fully containerized deployment
-- Comprehensive documentation
+- Production-ready API with all required endpoints
+- Comprehensive evaluation and benchmarking
+- 4-bit quantization for efficient deployment
+- Fully containerized (Docker Compose)
+- Complete documentation
 
 ## Table of Contents
 
