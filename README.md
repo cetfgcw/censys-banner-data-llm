@@ -40,6 +40,8 @@ This project implements a production-ready machine learning system for classifyi
 
 ## Quick Start
 
+The easiest way to get started is using Docker Compose. The system will automatically download the model on first run.
+
 ### Using Docker Compose (Recommended)
 
 1. **Clone and navigate to the project:**
