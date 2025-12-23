@@ -276,9 +276,17 @@ def print_evaluation_summary(results: Dict[str, Any], file=None):
     print("EVALUATION SUMMARY", file=file)
     print("="*80, file=file)
     
-    print(f"\nModel: {results['model_config']['model_name']}", file=file)
-    print(f"Quantization: {results['model_config']['use_quantization']} ({results['model_config']['quantization_bits']}-bit)", file=file)
-    print(f"Few-shot: {results['model_config']['use_few_shot']}", file=file)
+    model_config = results['model_config']
+    print(f"\nModel: {model_config.get('model_name', 'unknown')}", file=file)
+    if 'use_quantization' in model_config:
+        print(f"Quantization: {model_config['use_quantization']} ({model_config['quantization_bits']}-bit)", file=file)
+        print(f"Few-shot: {model_config['use_few_shot']}", file=file)
+    else:
+        # RoBERTa model
+        print(f"Model Type: {model_config.get('model_type', 'roberta')}", file=file)
+        print(f"Fine-tuned: {model_config.get('fine_tuned', False)}", file=file)
+        if model_config.get('epochs'):
+            print(f"Training Epochs: {model_config['epochs']}", file=file)
     
     print(f"\nDataset: {results['dataset_info']['evaluated_samples']} samples", file=file)
     print("\nClass Distribution:", file=file)

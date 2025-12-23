@@ -285,7 +285,7 @@ class RobertaBannerClassifier:
             logging_dir=f"{output_dir}/logs",
             logging_steps=100,
             save_strategy="epoch",
-            evaluation_strategy="epoch" if eval_dataset else "no",
+            eval_strategy="epoch" if eval_dataset else "no",
             load_best_model_at_end=True if eval_dataset else False,
         )
         
